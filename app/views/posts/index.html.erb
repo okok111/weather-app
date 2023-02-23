@@ -1,19 +1,19 @@
 <h1>posts#index</h1>
-<% if user_signed_in? %>    
-    <%= link_to 'ログアウト', destroy_user_session_path, method: :delete %>
-    <%= link_to "マイページへ", user_path(current_user.id) %>
-<% else %>
-    <%= link_to 'ログイン', new_user_session_path  %>
-<% end %>
-    <% @posts.each do |t| %>
-     
-      <p><%= t.title %></p>
-      <p><%= t.contents %></p>
-      <p><%= t.applemusic %></p>
-<%= link_to "詳細へ", post_path(t.id) %>
-    <% end %>
-
 <%= link_to "新規投稿へ", new_post_path %>
+<% if user_signed_in? %>    
+  <%= link_to 'ログアウト', destroy_user_session_path, method: :delete %>
+  <%= link_to "マイページへ", user_path(current_user.id) %>
+<% else %>
+  <%= link_to 'ログイン', new_user_session_path  %>
+<% end %>
+<% @posts.each do |t| %>
+  <p><%= t.title %></p>
+  <p><%= t.contents %></p>
+  <p><%= t.applemusic %></p>
+  <%= link_to "詳細へ", post_path(t.id) %>
+<% end %>
+
+<!-- 天気情報ここから↓-->
 <h1>今日の天気</h1>
 
 <div class="index-container">
