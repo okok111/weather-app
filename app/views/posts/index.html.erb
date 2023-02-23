@@ -1,0 +1,145 @@
+<h1>posts#index</h1>
+<% if user_signed_in? %>    
+    <%= link_to 'ログアウト', destroy_user_session_path, method: :delete %>
+    <%= link_to "マイページへ", user_path(current_user.id) %>
+<% else %>
+    <%= link_to 'ログイン', new_user_session_path  %>
+<% end %>
+    <% @posts.each do |t| %>
+     
+      <p><%= t.title %></p>
+      <p><%= t.contents %></p>
+      <p><%= t.applemusic %></p>
+<%= link_to "詳細へ", post_path(t.id) %>
+    <% end %>
+
+<%= link_to "新規投稿へ", new_post_path %>
+<h1>今日の天気</h1>
+
+<div class="index-container">
+  <div class="weather-container">
+    <div class="wffield">
+      <h3 class="weather__title">天気予報<i class="fas fa-cloud-sun"></i></h3>
+    
+        <select id="pref">
+        <option value="札幌">北海道</option>
+        <option value="青森">青森県</option>
+        <option value="盛岡">岩手県</option>
+        <option value="仙台">宮城県</option>
+        <option value="秋田">秋田県</option>
+        <option value="山形">山形県</option>
+        <option value="福島">福島県</option>
+        <option value="水戸">茨城県</option>
+        <option value="宇都宮">栃木県</option>
+        <option value="前橋">群馬県</option>
+        <option value="埼玉">埼玉県</option>
+        <option value="千葉">千葉県</option>
+        <option value="東京">東京都</option>
+        <option value="横浜">神奈川県</option>
+        <option value="新潟">新潟県</option>
+        <option value="富山">富山県</option>
+        <option value="金沢">石川県</option>
+        <option value="福井">福井県</option>
+        <option value="山梨">山梨県</option>
+        <option value="長野">長野県</option>
+        <option value="岐阜">岐阜県</option>
+        <option value="静岡">静岡県</option>
+        <option value="名古屋">愛知県</option>
+        <option value="津">三重県</option>
+        <option value="大津">滋賀県</option>
+        <option value="京都">京都府</option>
+        <option value="大阪">大阪府</option>
+        <option value="神戸">兵庫県</option>
+        <option value="奈良">奈良県</option>
+        <option value="和歌山">和歌山県</option>
+        <option value="鳥取">鳥取県</option>
+        <option value="松江">島根県</option>
+        <option value="岡山">岡山県</option>
+        <option value="広島">広島県</option>
+        <option value="山口">山口県</option>
+        <option value="徳島">徳島県</option>
+        <option value="高松">香川県</option>
+        <option value="松山">愛媛県</option>
+        <option value="高知">高知県</option>
+        <option value="福岡">福岡県</option>
+        <option value="佐賀">佐賀県</option>
+        <option value="長崎">長崎県</option>
+        <option value="熊本">熊本県</option>
+        <option value="大分">大分県</option>
+        <option value="宮崎">宮崎県</option>
+        <option value="鹿児島">鹿児島県</option>
+        <option value="那覇">沖縄県</option>
+      </select>
+      <div id="weather"></div>
+    </div>
+  </div>
+</div>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js" ></script>
+  <script>
+      var select = document.querySelector('[id="pref"]');
+
+      select.onchange = event => { 
+        const pref = select.value;
+        const API_KEY = "<%= ENV['WeatherAPI'] %>"
+      const latlon_url = 'https://api.openweathermap.org/geo/1.0/direct?q=' + pref + '&appid='+ API_KEY;
+      var weather_search = function() {
+      }
+        
+          $.ajax({
+          url: latlon_url,
+          dataType: "json",
+          type: 'GET',
+        })
+        .done(function (latlon) {
+          const lat = latlon[0].lat
+          const lon = latlon[0].lon
+      
+          // 天気予報を取得
+          const weather_url = 'https://api.openweathermap.org/data/2.5/onecall?lat=' + lat + '&lon=' + lon + '&lang=ja&exclude=current,minutely,hourly,alerts&units=metric&appid='+ API_KEY;
+        
+          $.ajax({
+              url: weather_url,
+              dataType: 'json',
+              type: 'GET',
+            })
+            .done(function (weather) {
+              let insertHTML = '';
+      
+              for (let i = 0; i <= 6; i = i + 1) {
+                insertHTML += buildHTML(weather, i);
+              }
+              
+              $('#weather').html(insertHTML);
+            })
+            .fail(function (weather) {
+              alert('天気予報の取得に失敗しました');
+            });
+        });
+      }
+
+
+    // 日本語で表示
+  function buildHTML(weather, i) {
+    //日付、時間を取得（Dateがミリ秒なので1000倍が必要）
+    const date = new Date(weather.daily[i].dt * 1000);
+    //UTCとの時差を無くす(日本は-9時間のため9を足す)
+    date.setHours(date.getHours() + 9);
+    //月を取得。getMonth()は0~11を返すため1を足すことによって1月~12月を返すように設定
+    const month = date.getMonth() + 1;
+    //曜日の日本語化のため、配列を用意する
+    const Week = new Array('(日)', '(月)', '(火)', '(水)', '(木)', '(金)', '(土)');
+    //月＋日＋曜日をdayに代入。getDay()は0~6を返すためWeek配列内のインデックスに対応した文字列を取得
+    const day = month + '/' + date.getDate() + Week[date.getDay()];
+    //天気のアイコンを取得
+    const icon = weather.daily[i].weather[0].icon;
+
+    const html =
+      '<div class="weather__content--report">' +
+        '<img src="https://openweathermap.org/img/w/' + icon + '.png">' +
+        '<span class="weather__content--report-date">' + day + "</span>" +
+        '<div class="weather__content--report-temp-max">' + '最高：' + Math.round(weather.daily[i].temp.max) + "℃</div>" +
+        '<span class="weather__content--report-temp-min">' + '最低：' + Math.floor(weather.daily[i].temp.min) + "℃</span>" +
+      '</div>';
+    return html
+  }
+  </script>
